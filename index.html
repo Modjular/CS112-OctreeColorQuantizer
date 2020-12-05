@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/freshfork/p5.EasyCam@1.0.10/p5.easycam.min.js"></script>
+    <script src="sketch.js"></script>
+    <style>
+body {
+        margin: 0px;
+        padding: 0px;
+}
+.container {
+  display: flex;
+  flex-direction: row;
+}
+.left {
+  flex: 1;
+  background-color: #fef9ef;
+}
+.right {
+  flex: 1;
+  background-color: lightblue;
+}
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="container">
+        
+        <div class="left">
+          <input type="file"
+            id="imageInput"
+            accept="image/png, image/jpeg"
+            onchange="onchangeHandler(this)"
+          >
+          <img id="uploaded" src=""/>
+        </div>
+  
+        <div class="right">
+          <div id="theSketch"></div>
+        </div>
+    </main>
+  </div>
+  </body>
+</html>
