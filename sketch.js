@@ -53,12 +53,17 @@ const sketchTemplate = (s) => {
                 s.image(img, 0, 0);
             }else{
             // else, do the cool split effect
-                s.image(qimgs[qmethod], 0, 0);
+                s.image(img,
+                        0,0,s.mouseX,img.height,    // dest sub-rect
+                        0,0,s.mouseX,img.height);   // source sub-rect
+                s.image(qimgs[qmethod],
+                        s.mouseX,0,img.width-s.mouseX,img.height,     // dest sub-rect
+                        s.mouseX,0,img.width-s.mouseX,img.height);   // source sub-rect
+
+                // draw the split line
+                s.line(s.mouseX, 0, s.mouseX, s.height);
+                s.ellipse(s.mouseX, s.mouseY, 8, 8);
             }
-
-
-            s.line(s.mouseX, 0, s.mouseX, s.height);
-            s.ellipse(s.mouseX, s.mouseY, 8, 8);
         }
 
     }
@@ -233,11 +238,12 @@ window.onload = () => {
             // myp5.handleFile(list[0])
 
 
-            // all this for displaying the uploaded file
+            // parse/display the uploaded file
             var reader = new FileReader();
             
             reader.onload = function(e) {
                 document.getElementById('uploaded').src = e.target.result;
+                document.getElementById('methodSelect').disabled = false;
                 IMAGE_UPLOADED = true;
                 
                 // now update the sketch
