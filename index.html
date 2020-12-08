@@ -2,6 +2,7 @@
   <head>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/freshfork/p5.EasyCam@1.0.10/p5.easycam.min.js"></script>
+    <script src="exampleAlgorithm.js"></script>
     <script src="sketch.js"></script>
     <style>
 body {
@@ -9,7 +10,8 @@ body {
         padding: 0px;
 }
 .container {
-  display: flex;
+  display: block;
+  flex-wrap: wrap;
   flex-direction: row;
 }
 .left {
@@ -32,6 +34,13 @@ body {
             accept="image/png, image/jpeg"
             onchange="onchangeHandler(this)"
           >
+          <select name="Quantization Method" id="methodSelect" onchange="methodOnChangeHandler(this)">
+            <option value="none">None</option>
+            <option value="uniform">Uniform</option>
+            <option value="median">Median Cut</option>
+            <option value="octree">Octree</option>
+          </select>
+          <br/>
           <img id="uploaded" src=""/>
         </div>
   
