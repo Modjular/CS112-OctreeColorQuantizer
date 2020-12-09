@@ -11,7 +11,7 @@ const blue = (c) => (c >> 16) & 0xFF;
 const green = (c) => (c >> 8) & 0xFF;
 const red = (c) => c & 0xFF;
 
-// dict of functions
+// dict of defined as functions
 const methods = {
     "uniform": exampleFunc,
     "median": exampleFunc,
@@ -29,36 +29,44 @@ const sketchTemplate = (s) => {
 
 
     s.setup = () => {
-        s.createCanvas(s.windowWidth, s.windowHeight); //, s.WEBGL);
+        s.createCanvas(128, 128); //, s.WEBGL);
         s.createEasyCam();
         //document.oncontextmenu = () => false;
-        s.background(100);
+        s.background(0,0);
+        s.frameRate(24);
+        //s.noFill();
+
+        //loading text while images load
+        //s.textSize(12);
+        s.text("Loading...", 0,12);
+
         s.strokeWeight(2);
         s.stroke(255,0,0);
         s.fill(255,0,0);
-        s.frameRate(24);
-        //s.noFill();
                 
         //s.drawColorSpace();
     }
 
     s.draw = () => {
 
+
+
         if(IMAGE_UPLOADED){
             //s.drawColorSpace();
             s.background(0);
 
-            // If "none" just redraw the image
             if(qmethod == "none"){
+                // If "none" just redraw the image
                 s.image(img, 0, 0);
             }else{
-            // else, do the cool split effect
+                 // else, do the cool split effect
+                let x = s.max(s.min(s.mouseX, img.width), 0);  // bounds check
                 s.image(img,
-                        0,0,s.mouseX,img.height,    // dest sub-rect
-                        0,0,s.mouseX,img.height);   // source sub-rect
+                        0,0,x,img.height,    // dest sub-rect
+                        0,0,x,img.height);   // source sub-rect
                 s.image(qimgs[qmethod],
-                        s.mouseX,0,img.width-s.mouseX,img.height,     // dest sub-rect
-                        s.mouseX,0,img.width-s.mouseX,img.height);   // source sub-rect
+                        x,0,img.width-x,img.height,   // dest sub-rect
+                        x,0,img.width-x,img.height);  // source sub-rect
 
                 // draw the split line
                 s.line(s.mouseX, 0, s.mouseX, s.height);
@@ -242,7 +250,7 @@ window.onload = () => {
             var reader = new FileReader();
             
             reader.onload = function(e) {
-                document.getElementById('uploaded').src = e.target.result;
+                //document.getElementById('uploaded').src = e.target.result;
                 document.getElementById('methodSelect').disabled = false;
                 IMAGE_UPLOADED = true;
                 

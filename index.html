@@ -13,14 +13,17 @@ body {
   display: block;
   flex-wrap: wrap;
   flex-direction: row;
+  background-color: #fef9ef;
 }
 .left {
   flex: 1;
-  background-color: #fef9ef;
+  padding: 16px;
 }
 .right {
   flex: 1;
-  background-color: lightblue;
+  padding: 16px;
+  margin-left: auto;
+  margin-right: auto;
 }
     </style>
   </head>
@@ -29,11 +32,13 @@ body {
       <div class="container">
         
         <div class="left">
+          <h1>Color Quantization Algorithms</h1>
           <input type="file"
             id="imageInput"
             accept="image/png, image/jpeg"
             onchange="onchangeHandler(this)"
           >
+          <label for="methodSelect">Quantization Method</label>
           <select disabled="true" name="Quantization Method" id="methodSelect" onchange="methodOnChangeHandler(this)">
             <option value="none">None</option>
             <option value="uniform">Uniform</option>
