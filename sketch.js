@@ -13,9 +13,9 @@ const red = (c) => c & 0xFF;
 
 // dict of defined as functions
 const methods = {
-    "uniform": exampleFunc,
-    "median": exampleFunc,
-    "octree": exampleFunc
+    "uniform": uniform,
+    "median": median,
+    "octree": octree
 }
 
 
