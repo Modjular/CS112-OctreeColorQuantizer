@@ -21,7 +21,7 @@ const median = (img) => {
      * Why not RGBA? idk haha
      * Example:
      * 11111111 00100101 00000000 10001000
-     * R        B        G        R
+     * A        B        G        R
      * 
      * However, I've provided helper functions that do the bit-shifting
      * you need to properly access the colors you'll need
@@ -34,7 +34,7 @@ const median = (img) => {
        return null;
    }
 
-   const alpha = (c) => (c >> 16) & 0xFF;
+   const alpha = (c) => (c >> 24) & 0xFF;
    const blue  = (c) => (c >> 16) & 0xFF;
    const green = (c) => (c >> 8)  & 0xFF;
    const red   = (c) => c & 0xFF;
@@ -46,16 +46,63 @@ const median = (img) => {
    for(let i = 0; i < img.length; i++) {
        unique_colors.add(img[i]);
    }
+    
+   let array_colors = Array.from(unique_colors);
 
+   const med_recursive = (colors, depth) => {
+      
+      if (colors.length == 0){
+          return
+      }
+      
+      if (depth == 0){
+         let a_arr = [...colors].map((c) => alpha(c));
+         let b_arr = [...colors].map((c) => blue(c));
+         let g_arr = [...colors].map((c) => green(c));
+         let r_arr = [...colors].map((c) => red(c));
+         let a_avg = a_arr.reduce((a,b) => a+b)/colors.length;
+         let b_avg = b_arr.reduce((a,b) => a+b)/colors.length;
+         let g_avg = g_arr.reduce((a,b) => a+b)/colors.length;
+         let r_avg = r_arr.reduce((a,b) => a+b)/colors.length;
+         //}
+         let avg = (a_avg<<24)|(b_avg<<16)|(g_avg<<8)|(r_avg);
+         //avg = colors.reduce((a,b) => a + b)/colors.length;
+         colors.forEach( (c) => {
+            color_map.set(c, avg);
+         });
+         return
+      }
+       
+      let b_max = colors.reduce((a,b) => Math.max(blue(a),blue(b))) - colors.reduce((a,b) => Math.min(blue(a),blue(b)));
+      let g_max = colors.reduce((a,b) => Math.max(green(a),green(b))) - colors.reduce((a,b) => Math.min(green(a),green(b)));
+      let r_max = colors.reduce((a,b) => Math.max(red(a),red(b))) - colors.reduce((a,b) => Math.min(red(a),red(b)));
+       
+      let max_range = Math.max(b_max,g_max,r_max);
+       
+      if (max_range == b_max){
+          colors.sort((a,b) => blue(a) - blue(b));
+      }
+      else if (max_range == g_max){
+          colors.sort((a,b) => green(a) - green(b));
+      }
+      else{
+          colors.sort((a,b) => red(a) - red(b));
+      }
+       
+      let half = Math.ceil(colors.length/2);
+      med_recursive(colors.splice(0,half),depth-1);
+      med_recursive(colors.splice(-half),depth-1);
+   }
+   
+   med_recursive(array_colors, 8);
+   
    /**
     * Here's where you'll implement the algorithm
     * 
     * For example, lets say we just map each unique color to 
     * a random color.
     */
-   unique_colors.forEach( (c) => {
-       color_map.set(c, (Math.random()*4294967296)>>>0);
-   });
+   
 
    // This returned map will be use to recolor the original image
    return color_map
