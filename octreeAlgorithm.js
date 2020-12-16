@@ -34,7 +34,7 @@ const octree = (img) => {
        return null;
    }
 
-   const alpha = (c) => (c >> 16) & 0xFF;
+   const alpha = (c) => (c >> 24) & 0xFF;
    const blue  = (c) => (c >> 16) & 0xFF;
    const green = (c) => (c >> 8)  & 0xFF;
    const red   = (c) => c & 0xFF;
@@ -47,16 +47,113 @@ const octree = (img) => {
        unique_colors.add(img[i]);
    }
 
-   /**
-    * Here's where you'll implement the algorithm
-    * 
-    * For example, lets say we just map each unique color to 
-    * a random color.
-    */
-   unique_colors.forEach( (c) => {
-       color_map.set(c, (Math.random()*4294967296)>>>0);
-   });
 
-   // This returned map will be use to recolor the original image
-   return color_map
+    // Following the algorithm description from section 2.1:
+    // http://www.leptonica.org/papers/colorquant.pdf
+    // Create a colormap that holds 256 colors
+    // any 32-bit color can now be mapped with 8 bits
+    //  3 bits from red
+    //  3 bits from green
+    //  2 bits from blue
+    // This corresponds to the respective "cube index" of
+    // their respective oct-cubes
+    cmap = new Uint32Array(256);
+    let rval, gval, bval, aval;
+    for (let index = 0; index < 256; index++) {
+        rval = (index        & 0xe0) | 0x10;
+        gval = ((index << 3) & 0xe0) | 0x10;
+        bval = ((index << 6) & 0xc0) | 0x20;// Blue is only first 2 msbits 
+        aval = 0xFF;                        // Just set to full opacity
+        cmap[index] = (aval<<24)|(bval<<16)|(gval<<8)|(rval);
+    }
+
+    // Finally, we take the unique colors in this image and
+    // map to their respective oct-cube color
+    unique_colors.forEach( (c) => {
+        rval = red(c);
+        gval = green(c);
+        bval = blue(c);
+        index = (rval & 0b11100000) | (gval & 0b11100000) >> 3 | (bval & 0b11000000) >> 6;
+        color_map.set(c, cmap[index]);
+    });
+
+    // This returned map will be use to recolor the original image
+    return color_map
+}
+
+
+
+
+// ======
+// Octree
+// ======
+
+// octree node declaration
+class Node{
+    constructor(){
+        this.is_leaf = false;
+        this.depth = 0;
+        this.colors = 0; // might be possible for this to only be one;
+        this.child = [];
+    }
+}
+
+// Actual function for building an octree
+const buildNode = (colors, depth) => {
+    if(colors.length == 0){
+        return null;
+    }
+    if(colors.length < 12){ 
+        let n = new Node();
+        n.is_leaf = true;
+        n.color = colors[0]; // This should actually be averaged out
+        n.depth = depth;
+        return n;
+    }
+    
+    // At this point, if we have too many colors,
+    // we have to subdivide them into 8 bins
+    // with getColorIndex()
+
+    let bins = Array(8).fill(Array(0)); // create an empty array of 8 arrays
+    colors.forEach((c) => {
+        let index = getColorIndex(c);
+        bins[index].push(c);
+    });
+
+    let n = new Node();
+    n.depth = depth;
+    for(let i = 0; i < 8; i++){
+        n.child[i] = buildNode(bin[i], depth+1);
+    }
+    return n;
+}
+
+const pruneOctree = (k, root) => {
+    /**
+     * k == max number of colors to reduce to
+     */
+
+    // On this second pass, we will go down into the lower depths
+    // How will we determine when to merge, and how many to merge?
+    // idk
+    // Implementing the One-Pass version found in section 2.1 here:
+    // http://www.leptonica.org/papers/colorquant.pdf
+
+    // Maybe I can implement a more advanced version later
+    // 
+}
+
+
+// ======
+// Helper
+// ======
+
+const getColorIndex = (color, level) => {
+    let index = 0;
+    let mask = 0b10000000 >> level;
+    if (red(color) & mask)   index |= 0b100;
+    if (green(color) & mask) index |= 0b010;
+    if (blue(color) & mask)  index |= 0b001;
+    return index;
 }
