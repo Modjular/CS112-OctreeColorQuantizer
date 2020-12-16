@@ -45,7 +45,6 @@ const uniform = (img) => {
 
    let color_map = new Map();
    let unique_colors = new Set();
-   let reduced_colors = new Set()
    
    // Grab the unique colors for later use
    for(let i = 0; i < img.length; i++) {
