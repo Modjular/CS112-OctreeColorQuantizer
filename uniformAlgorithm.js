@@ -74,15 +74,6 @@ const uniform = (img) => {
     }
   }
 
-  //function to get a reduced color given a list of average colors for each color region
-  function reduced_color(color_value, average){
-  	for(let i = 0; i < color_regions.length; i++){
-      if (color_value >= color_regions[i][0] && color_value <= color_regions[i][1]){
-        return average[i];
-      }
-    }
-  }
-
   let array_colors = Array.from(unique_colors);
 
   red_regions = [[],[],[],[],[],[],[],[]];
@@ -115,18 +106,18 @@ const uniform = (img) => {
     }
   }
 
-  // At this point you have divided colors into 8 regions by RGB, calculated the average color for each region by taking the average,
-  // now just replace the palette with those average colors put back together
+  // At this point you have divided colors into 8 regions by RGB and calculated the average color for each region by taking the average,
+  // now just replace the original palette with those average colors.
 
    unique_colors.forEach( (c) => {
    		let r = red(c);
 	    let g = green(c);
 	    let b = blue(c);
-	   	let rr = reduced_color(r, red_rep_colors);
-	   	let rg = reduced_color(g, green_rep_colors) << 8;
-	   	let rb = reduced_color(b, blue_rep_colors) << 16;
-	   	let new_color = unsign(a | rb | rg | rr);
-        color_map.set(c, new_color);
+	   	let rr = red_rep_colors[get_color_region(r)];
+	   	let rg = green_rep_colors[get_color_region(g)] << 8;
+	   	let rb = blue_rep_colors[get_color_region(b)] << 16;
+	   	let reduced_color = unsign(a | rb | rg | rr);
+        color_map.set(c, reduced_color);
     });
 
 
