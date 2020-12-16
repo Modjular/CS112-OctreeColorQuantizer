@@ -191,22 +191,19 @@ const sketchTemplate = (s) => {
     s.changeMethod = (method) => {
         console.log("Changed method to", method);
         qmethod = method;
-        console.log("WIDTH", qimgs["uniform"].width, qimgs["uniform"].height);
-
     }
 
     // Method is a function, image, the original image
     // Returns a new image mapped to the color_map
     s.imageFromMethod = (method, image) => {
-        
+
+        console.info("Starting imageFromMethod(" + method.name + ")...");
+        console.time("imageFromMethod(" + method.name + ")");
+
         image.loadPixels();
         let arr = new Uint32Array(image.pixels.buffer);
         let color_map = method(arr);
-        console.log(color_map);
-        console.log("Created palette with", color_map.size, "colors");
         let new_img = s.createImage(image.width, image.height);
-
-        console.log("RAND COLOR", image.get(0,0))
 
         for (let i = 0; i < image.width; i++) {
             for (let j = 0; j < image.height; j++) {
@@ -216,15 +213,26 @@ const sketchTemplate = (s) => {
                 new_img.set(i, j, s.color(red(newc), green(newc), blue(newc)));
             }
         }
-
         new_img.updatePixels();
+
+        console.timeEnd("imageFromMethod(" + method.name + ")");
+
         return new_img;
+    }
+
+    s.downloadCurrentMethodImage = () => {
+        s.save(qimgs[qmethod], qmethod + ".jpeg");
+    }
+
+    s.getCurrentMethodName = () => {
+        return qmethod;
     }
 }
 
 
 var myp5;
 var onchangeHandler;
+var downloadCurrentMethodImageHandler;
 
 window.onload = () => {
     
@@ -267,6 +275,18 @@ window.onload = () => {
     methodOnChangeHandler = (e) => {
         if(myp5){
             myp5.changeMethod(e.value);
+            if(e.value == 'none'){
+                document.getElementById('download').disabled = true;
+            }else{
+                document.getElementById('download').disabled = false;
+            }
+        }
+    }
+
+    downloadCurrentMethodImageHandler = (e) => {
+        if(myp5){
+            console.info("Downloading " + myp5.getCurrentMethodName());
+            myp5.downloadCurrentMethodImage();
         }
     }
 }
