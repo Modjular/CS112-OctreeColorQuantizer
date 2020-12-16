@@ -7,7 +7,7 @@
  * NOTE: It will need to be included BEFORE sketch.js in the HTML
  */
 
-//https://muthu.co/reduce-the-number-of-colors-of-an-image-using-uniform-quantization/ REMEMBER TO DELETE THIS AFTER YOU FINISH IMPLEMENTING
+
 const uniform = (img) => {
     /**
      * NOTE
@@ -69,7 +69,6 @@ const uniform = (img) => {
   function get_color_region(color_value){
     for(let i = 0; i < color_regions.length; i++){
       if (color_value >= color_regions[i][0] && color_value <= color_regions[i][1]){
-        // alert("color value " + color_value + " falls into region " + "[" + color_regions[i][0] + "-" + color_regions[i][1] + "]");
         return i;
       }
     }
