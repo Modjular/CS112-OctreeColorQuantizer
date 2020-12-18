@@ -27,17 +27,17 @@ const octreeAdaptive = (img) => {
      */
 
 
-    const alpha = (c) => (c >> 24) & 0xFF;
-    const blue  = (c) => (c >> 16) & 0xFF;
-    const green = (c) => (c >> 8)  & 0xFF;
-    const red   = (c) => c & 0xFF;
-
     // Double check its of the right form
     if(!img instanceof Uint32Array){
         console.error(img, "is not a Uint32Array");
         return null;
     }
 
+    const alpha = (c) => (c >> 24) & 0xFF;
+    const blue  = (c) => (c >> 16) & 0xFF;
+    const green = (c) => (c >> 8)  & 0xFF;
+    const red   = (c) => c & 0xFF;
+    
     let color_map = new Map();
     let unique_colors = new Set();
     
@@ -51,12 +51,9 @@ const octreeAdaptive = (img) => {
     // Convert unique_colors to a Uint32Arrray
     // Calculate the rough capacity for each leaf
     // Declare root node, begin recursively building
-
     let colors = Uint32Array.from(unique_colors);
     let rough_cap = Math.floor(unique_colors.size / 256 * 7);
-    console.log("rough_cap", rough_cap);
     let octree = buildOctNode(colors, 0, rough_cap);
-    console.log("DEBUG_LEAF_COUNT ", DEBUG_LEAF_COUNT);
 
     // Step 2.
     // If the palette > k, prune leaves via mergine
@@ -64,8 +61,8 @@ const octreeAdaptive = (img) => {
 
     // Step 3.
     // Search the tree for all the new leaves
+    // Each leaf represents a palette color
     let leafs = getOctreeLeafs(octree);
-    console.log("# of leafs: ", leafs.length);
 
     // Step 4.
     // Iterate over leaves, averaging the colors to obtain the palette color
@@ -74,15 +71,27 @@ const octreeAdaptive = (img) => {
     // Finally, fill the colormap with the new palette
     leafs.forEach((node) => {
 
-        // let avg_color = Math.round(node.colors.reduce((sum, c) => sum + c) / node.colors.length);
-        let avg_color = node.colors[0];
-        // TODO: Is this color avg causing the weird color banding? 
-        // what if i just replace with first color?
+        let rsum = 0;
+        let gsum = 0;
+        let bsum = 0;
 
         node.colors.forEach((c) => {
-            color_map.set(c, avg_color);
+            rsum += red(c);
+            gsum += green(c);
+            bsum += blue(c);
+        });
+
+        let ravg = Math.floor(rsum / node.colors.length);
+        let gavg = Math.floor(gsum / node.colors.length);
+        let bavg = Math.floor(bsum / node.colors.length);
+
+        let avg = (0xFF<<24)|(bavg<<16)|(gavg<<8)|(ravg);
+
+        node.colors.forEach((c) => {
+            color_map.set(c, avg);
         })
     });
+
     return color_map
 }
 
@@ -103,7 +112,6 @@ class OctNode{
     }
 }
 
-var DEBUG_LEAF_COUNT = 0;
 // Actual function for building an octree
 // colors:  Uint32Array
 // depth:   int
@@ -116,7 +124,6 @@ const buildOctNode = (colors, depth, bin_cap) => {
     }
 
     if(colors.length <= bin_cap || depth >= 6){  // Max depth
-        DEBUG_LEAF_COUNT++;
         let n = new OctNode();
         n.is_leaf = true;
         n.colors = colors;
@@ -127,9 +134,6 @@ const buildOctNode = (colors, depth, bin_cap) => {
     // At this point, if we have too many colors,
     // we have to subdivide them into 8 bins
     // with getColorIndex()
-    // With arbitrary points we would have to
-    // do fancy bbox collision test
-    // Luckily, 8-bit color indexes naturally
 
     let bins = Array(8) // create an array of 8 empty Arrays
     for(let i = 0; i < 8; i++){
@@ -144,9 +148,6 @@ const buildOctNode = (colors, depth, bin_cap) => {
     let n = new OctNode();
     n.depth = depth;
     for(let i = 0; i < 8; i++){
-        if(depth == 0){
-            // console.log("bin", i, bins[i].length);
-        }
         n.child[i] = buildOctNode(bins[i], depth+1, bin_cap);
     }
     return n;
@@ -175,7 +176,6 @@ const pruneOctree = (k, root) => {
 const getOctreeLeafs = (node) => {
 
     if(node.is_leaf){
-        DEBUG_LEAF_COUNT++;
         return [node];  // so that it can be used with concat
     }else{
         let leafs = Array()
@@ -184,16 +184,18 @@ const getOctreeLeafs = (node) => {
                 leafs = leafs.concat(getOctreeLeafs(node.child[i]));
             }
         }
-        //console.log("leafs.length", leafs.length);
         return leafs;
     }
 }
+
 
 
 // ======
 // Helper
 // ======
 
+// Tom MacWright
+// https://observablehq.com/@tmcw/octree-color-quantization
 const getColorIndex = (color, level) => {
     let index = 0;
     let mask = 0b10000000 >> level;

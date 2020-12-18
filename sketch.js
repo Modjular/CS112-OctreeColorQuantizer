@@ -173,9 +173,9 @@ const sketchTemplate = (s) => {
 
             // 2. load all other versions into qimgs
             // For readability, i'll just spell out the ops here
-            // qimgs["uniform"] = s.imageFromMethod(methods["uniform"], img);
-            // qimgs["median"]  = s.imageFromMethod(methods["median"], img);
-            // qimgs["octree"]  = s.imageFromMethod(methods["octree"], img);
+            qimgs["uniform"] = s.imageFromMethod(methods["uniform"], img);
+            qimgs["median"]  = s.imageFromMethod(methods["median"], img);
+            qimgs["octree"]  = s.imageFromMethod(methods["octree"], img);
             qimgs["octree2"] = s.imageFromMethod(methods["octree2"], img);
 
             // TODO make these async and use Promise.all() to 
