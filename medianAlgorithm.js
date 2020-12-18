@@ -94,7 +94,7 @@ const median = (img) => {
       med_recursive(colors.splice(-half),depth-1);
    }
    
-   med_recursive(array_colors, 8);
+   med_recursive(array_colors, 9);
    
    /**
     * Here's where you'll implement the algorithm
