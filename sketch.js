@@ -133,18 +133,15 @@ const sketchTemplate = (s) => {
         let result = new Set();
         img.loadPixels();
         let colors = new Uint32Array(img.pixels.buffer);
-        console.log("colors instanceof Uint32Array =", colors instanceof Uint32Array);
         
         //console.log(colors.length);
         for(let i = 0; i < colors.length; i++) {
             //console.log(colors[i]);
             result.add(colors[i]);
             if(result.size >= 128){
-                s.print("Set cutoff at size 128")
                 break;
             }
         }
-        console.log("color_set has ", result.size, " colors");
 
         IMAGE_UPLOADED = true;
         return result;
@@ -200,14 +197,17 @@ const sketchTemplate = (s) => {
     // Returns a new image mapped to the color_map
     s.imageFromMethod = (method, image) => {
 
-        console.info("Starting imageFromMethod(" + method.name + ")...");
-        console.time("imageFromMethod(" + method.name + ")");
+        console.group("imageFromMethod(" + method.name + ")");
+        console.time("Total");
 
         image.loadPixels();
         let arr = new Uint32Array(image.pixels.buffer);
-        let color_map = method(arr);
+        console.time(method.name + "(img)"); // The actual palette creation
+            let color_map = method(arr);
+        console.timeEnd(method.name + "(img)");
         let new_img = s.createImage(image.width, image.height);
 
+        console.time("Colormap to image...");
         for (let i = 0; i < image.width; i++) {
             for (let j = 0; j < image.height; j++) {
                 let rgba = image.get(i, j);     // p5.Image.get() -> [r,g,b,a]
@@ -217,8 +217,10 @@ const sketchTemplate = (s) => {
             }
         }
         new_img.updatePixels();
+        console.timeEnd("Colormap to image...");
 
-        console.timeEnd("imageFromMethod(" + method.name + ")");
+        console.timeEnd("Total");
+        console.groupEnd()
 
         return new_img;
     }
