@@ -37,7 +37,7 @@ const octreeAdaptive = (img) => {
     const blue  = (c) => (c >> 16) & 0xFF;
     const green = (c) => (c >> 8)  & 0xFF;
     const red   = (c) => c & 0xFF;
-    
+
     let color_map = new Map();
     let unique_colors = new Set();
     
@@ -63,6 +63,8 @@ const octreeAdaptive = (img) => {
     // Search the tree for all the new leaves
     // Each leaf represents a palette color
     let leafs = getOctreeLeafs(octree);
+    let psize = leafs.length;
+    console.log("Reduced", unique_colors.size, "colors to", psize);
 
     // Step 4.
     // Iterate over leaves, averaging the colors to obtain the palette color
@@ -92,7 +94,7 @@ const octreeAdaptive = (img) => {
         })
     });
 
-    return color_map
+    return color_map; // ES6
 }
 
 

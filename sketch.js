@@ -170,9 +170,9 @@ const sketchTemplate = (s) => {
 
             // 2. load all other versions into qimgs
             // For readability, i'll just spell out the ops here
-            qimgs["uniform"] = s.imageFromMethod(methods["uniform"], img);
-            qimgs["median"]  = s.imageFromMethod(methods["median"], img);
-            qimgs["octree"]  = s.imageFromMethod(methods["octree"], img);
+            // qimgs["uniform"] = s.imageFromMethod(methods["uniform"], img);
+            // qimgs["median"]  = s.imageFromMethod(methods["median"], img);
+            // qimgs["octree"]  = s.imageFromMethod(methods["octree"], img);
             qimgs["octree2"] = s.imageFromMethod(methods["octree2"], img);
 
             // TODO make these async and use Promise.all() to 
@@ -200,14 +200,19 @@ const sketchTemplate = (s) => {
         console.group("imageFromMethod(" + method.name + ")");
         console.time("Total");
 
+        // 1. Load image's pixels array and convert to Uint32Array
         image.loadPixels();
         let arr = new Uint32Array(image.pixels.buffer);
-        console.time(method.name + "(img)"); // The actual palette creation
-            let color_map = method(arr);
-        console.timeEnd(method.name + "(img)");
-        let new_img = s.createImage(image.width, image.height);
 
+        // 2. Quantize the image
+        console.time(method.name + "(img)"); 
+        const color_map = method(arr);   // size != color_map.size. Its size of NEW palette
+        //console.log(color_map, psize);
+        console.timeEnd(method.name + "(img)");
+
+        // 3. Write a new image with new palette
         console.time("Colormap to image...");
+        let new_img = s.createImage(image.width, image.height);
         for (let i = 0; i < image.width; i++) {
             for (let j = 0; j < image.height; j++) {
                 let rgba = image.get(i, j);     // p5.Image.get() -> [r,g,b,a]
